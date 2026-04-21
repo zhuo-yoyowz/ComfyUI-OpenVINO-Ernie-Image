@@ -1,0 +1,18 @@
+name: python-check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  py-compile:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile Python files
+        run: python -m py_compile nodes.py scripts/check_env.py scripts/verify_comfyui_api.py scripts/start_comfyui_openvino.py

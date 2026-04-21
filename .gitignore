@@ -1,0 +1,32 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.python-version
+.venv/
+venv/
+env/
+.env
+.logs/
+
+# ComfyUI/runtime outputs
+output/
+input/
+temp/
+*.log
+
+# Model weights and exports
+models/
+ERNIE-Image*/
+Turbo/
+*.bin
+*.safetensors
+*.onnx
+*.xml
+*.blob
+*.npz
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
