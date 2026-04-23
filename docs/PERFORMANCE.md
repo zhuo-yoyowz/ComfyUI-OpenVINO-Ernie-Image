@@ -18,6 +18,17 @@ load_pe: true
 use_pe: false
 ```
 
+For Base INT8 comparisons, use:
+
+```text
+width: 512
+height: 512
+steps: 20
+guidance_scale: 4.0
+load_pe: true
+use_pe: false
+```
+
 Use the API verifier:
 
 ```powershell
@@ -33,12 +44,28 @@ python .\scripts\verify_comfyui_api.py `
   --timeout 1800
 ```
 
+For Base INT8, add `--model-profile base` and point `--model-dir` to the Base
+INT8 export:
+
+```powershell
+python .\scripts\verify_comfyui_api.py `
+  --comfyui-dir C:\path\to\ComfyUI `
+  --model-profile base `
+  --model-dir C:\models\ERNIE-Image-ov-int8 `
+  --device GPU `
+  --width 512 `
+  --height 512 `
+  --no-use-pe `
+  --timeout 1800
+```
+
 ## Results Template
 
 | Hardware | OpenVINO device | Resolution | Steps | First run | Warm run | Notes |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | Intel Core Ultra | GPU | 512x512 | 8 | TBD | TBD | Add driver and OpenVINO version |
 | Intel Arc | GPU | 512x512 | 8 | TBD | TBD | Add driver and OpenVINO version |
+| Intel Core Ultra | GPU | 512x512 | 20 | TBD | TBD | Base INT8 profile |
 
 ## Measurement Notes
 

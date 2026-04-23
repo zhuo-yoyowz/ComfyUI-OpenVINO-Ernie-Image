@@ -54,6 +54,21 @@ use_pe: false
 That keeps the PE model available but sends the original prompt directly to the
 diffusion pipeline.
 
+## `pe_tokenizer` format
+
+For this node, `pe_tokenizer` should be a normal tokenizer asset directory:
+
+```text
+pe_tokenizer/
+  chat_template.jinja
+  special_tokens_map.json
+  tokenizer.json
+  tokenizer_config.json
+```
+
+OpenVINO tokenizer IR files are not required here. The OpenVINO IR model for
+Prompt Enhancer lives in `pe/openvino_model.xml` and `pe/openvino_model.bin`.
+
 ## comfy-aimdo failed to load
 
 You may see:

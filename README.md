@@ -1,6 +1,6 @@
 # ComfyUI OpenVINO ERNIE-Image
 
-> ERNIE-Image Turbo INT4 in ComfyUI, accelerated by OpenVINO on Intel AI PCs.
+> ERNIE-Image Base INT8 and Turbo INT4 in ComfyUI, accelerated by OpenVINO on Intel AI PCs.
 
 [![OpenVINO](https://img.shields.io/badge/OpenVINO-2026.1-7B61FF)](https://github.com/openvinotoolkit/openvino)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-custom_node-black)](https://github.com/comfyanonymous/ComfyUI)
@@ -8,16 +8,16 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-Run **ERNIE-Image Turbo INT4** inside **ComfyUI** on **Intel integrated GPUs,
+Run **ERNIE-Image Base INT8** and **ERNIE-Image Turbo INT4** inside **ComfyUI** on **Intel integrated GPUs,
 Intel Arc GPUs, and Intel AI PCs**. No CUDA required.
 
 ![Sample generated with ERNIE-Image Turbo INT4 and OpenVINO](assets/ComfyUI_00017_.png)
 
 ## Highlights
 
-- **ComfyUI node for ERNIE-Image Turbo** using the OpenVINO backend
+- **ComfyUI node for ERNIE-Image Base and Turbo** using the OpenVINO backend
 - **OpenVINO backend** with `GPU`, `CPU`, and `AUTO` device selection
-- **ERNIE-Image Turbo INT4** support through the standard Optimum export layout
+- **ERNIE-Image Base INT8 and Turbo INT4** support through the standard Optimum export layout
 - **Prompt Enhancer support** when the exported model contains `pe` and `pe_tokenizer`
 - **CUDA-free ComfyUI launchers** for Intel AI PCs
 - **API smoke test and environment checker** for repeatable validation
@@ -57,6 +57,12 @@ python -m pip install modelscope
 modelscope download --model snake7gun/ERNIE-Image-Turbo-ov-int4 --local_dir C:\models\ERNIE-Image-Turbo-ov-int4
 ```
 
+For ERNIE-Image Base INT8, use an Optimum/OpenVINO exported directory such as:
+
+```text
+C:\models\ERNIE-Image-ov-int8
+```
+
 Start ComfyUI with the Intel AI PC launcher:
 
 ```powershell
@@ -80,6 +86,8 @@ Connect `image` to `SaveImage.images`.
 
 ## Recommended Settings
 
+Turbo INT4:
+
 ```text
 model_dir: C:\models\ERNIE-Image-Turbo-ov-int4
 prompt: a centered whole red apple on a wooden table, studio lighting, sharp focus, high quality
@@ -98,6 +106,26 @@ guidance_scale: 1.0
 seed: 42
 ```
 
+Base INT8:
+
+```text
+model_dir: C:\models\ERNIE-Image-ov-int8
+prompt: a centered whole red apple on a wooden table, studio lighting, sharp focus, high quality
+negative_prompt:
+device: GPU
+load_pe: true
+use_pe: false
+pe_max_new_tokens: 256
+text_encoder_device:
+transformer_device:
+vae_decoder_device:
+width: 512
+height: 512
+steps: 20
+guidance_scale: 4.0
+seed: 42
+```
+
 For strict composition, keep `load_pe=true` and set `use_pe=false`.
 
 ## Check Your Environment
@@ -113,7 +141,7 @@ It checks:
 - Python package availability
 - OpenVINO available devices
 - whether `GPU` is visible
-- expected ERNIE-Image Turbo model layout
+- expected ERNIE-Image model layout
 - optional Prompt Enhancer files
 
 ## Why `--cpu` Is Used To Start ComfyUI
@@ -161,10 +189,27 @@ python .\scripts\verify_comfyui_api.py `
 
 The output image is saved in ComfyUI's `output` directory.
 
+Base INT8 verification:
+
+```powershell
+python .\scripts\verify_comfyui_api.py `
+  --comfyui-dir C:\path\to\ComfyUI `
+  --model-profile base `
+  --model-dir C:\models\ERNIE-Image-ov-int8 `
+  --device GPU `
+  --width 512 `
+  --height 512 `
+  --no-use-pe `
+  --filename-prefix ov_ernie_base_int8_gpu `
+  --timeout 1800
+```
+
 ## Example Workflows
 
 - [workflows/ernie_image_turbo_int4_comfyui.json](workflows/ernie_image_turbo_int4_comfyui.json): import into ComfyUI
 - [workflows/ernie_image_turbo_int4_api.json](workflows/ernie_image_turbo_int4_api.json): minimal API payload
+- [workflows/ernie_image_base_int8_comfyui.json](workflows/ernie_image_base_int8_comfyui.json): Base INT8 workflow
+- [workflows/ernie_image_base_int8_api.json](workflows/ernie_image_base_int8_api.json): Base INT8 API payload
 
 After loading a workflow, update `model_dir` to your local model path.
 
@@ -173,7 +218,7 @@ After loading a workflow, update `model_dir` to your local model path.
 This node supports the standard Optimum OpenVINO layout:
 
 ```text
-ERNIE-Image-Turbo-ov-int4/
+ERNIE-Image-ov-int8/ or ERNIE-Image-Turbo-ov-int4/
   model_index.json
   openvino_config.json
   scheduler/

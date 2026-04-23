@@ -106,12 +106,22 @@ def build_argparser() -> argparse.ArgumentParser:
     parser.add_argument("--timeout", type=int, default=1200, help="Maximum seconds to wait for the prompt to finish.")
     parser.add_argument("--filename-prefix", default="ov_ernie_comfy_api", help="SaveImage filename prefix.")
     parser.add_argument("--model-dir", help="OpenVINO ERNIE-Image model directory.")
+    parser.add_argument(
+        "--model-profile",
+        choices=["turbo", "base"],
+        default="turbo",
+        help="Preset inference profile. 'turbo' uses faster defaults, 'base' uses higher guidance defaults.",
+    )
     parser.add_argument("--comfyui-dir", help="Path to the ComfyUI directory. Auto-detected by default.")
     parser.add_argument(
         "--custom-node-name",
         help="Custom node folder name for ComfyUI's --whitelist-custom-nodes option. Defaults to this repo folder.",
     )
     return parser
+
+
+def was_provided(option: str) -> bool:
+    return option in sys.argv or any(arg.startswith(f"{option}=") for arg in sys.argv)
 
 
 def main() -> int:
@@ -126,8 +136,23 @@ def main() -> int:
     port = args.port
     base_url = f"http://127.0.0.1:{port}"
     device = args.device or default_openvino_device()
-    model_dir = Path(args.model_dir).expanduser().resolve() if args.model_dir else repo_root / "ERNIE-Image-Turbo-ov-int4"
+    model_dir = (
+        Path(args.model_dir).expanduser().resolve()
+        if args.model_dir
+        else (repo_root / "ERNIE-Image-ov-int8" if args.model_profile == "base" else repo_root / "ERNIE-Image-Turbo-ov-int4")
+    )
     custom_node_name = args.custom_node_name or repo_root.name
+    steps = int(args.steps)
+    guidance_scale = float(args.guidance_scale)
+    load_pe = bool(args.load_pe)
+    use_pe = bool(args.use_pe)
+    if args.model_profile == "base":
+        if not was_provided("--steps"):
+            steps = 20
+        if not was_provided("--guidance-scale"):
+            guidance_scale = 4.0
+        if not was_provided("--use-pe") and not was_provided("--no-use-pe"):
+            use_pe = False
 
     command = [
         str(python_exe),
@@ -143,6 +168,7 @@ def main() -> int:
         "--log-stdout",
         "--database-url",
         "sqlite:///:memory:",
+        "--disable-all-custom-nodes",
         "--whitelist-custom-nodes",
         custom_node_name,
     ]
@@ -168,16 +194,16 @@ def main() -> int:
                         "prompt": args.prompt,
                         "negative_prompt": args.negative_prompt,
                         "device": device,
-                        "load_pe": args.load_pe,
-                        "use_pe": args.use_pe,
+                        "load_pe": load_pe,
+                        "use_pe": use_pe,
                         "pe_max_new_tokens": args.pe_max_new_tokens,
                         "text_encoder_device": args.text_encoder_device,
                         "transformer_device": args.transformer_device,
                         "vae_decoder_device": args.vae_decoder_device,
                         "width": args.width,
                         "height": args.height,
-                        "steps": args.steps,
-                        "guidance_scale": args.guidance_scale,
+                        "steps": steps,
+                        "guidance_scale": guidance_scale,
                         "seed": args.seed,
                     },
                 },

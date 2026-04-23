@@ -1,6 +1,6 @@
 # ComfyUI OpenVINO ERNIE-Image
 
-> 在 Intel AI PC 上，用 OpenVINO backend 在 ComfyUI 里运行 ERNIE-Image Turbo INT4。
+> 在 Intel AI PC 上，用 OpenVINO backend 在 ComfyUI 里运行 ERNIE-Image Base INT8 和 Turbo INT4。
 
 [English README](README.md)
 
@@ -8,9 +8,9 @@
 
 ## 这个项目解决什么问题
 
-这个 custom node 把 ERNIE-Image Turbo INT4、OpenVINO 和 ComfyUI 串成一个干净的本地文生图工作流：
+这个 custom node 把 ERNIE-Image Base INT8、ERNIE-Image Turbo INT4、OpenVINO 和 ComfyUI 串成一个干净的本地文生图工作流：
 
-- 面向 Intel AI PC 和 Intel GPU 的 ERNIE-Image Turbo ComfyUI 节点
+- 面向 Intel AI PC 和 Intel GPU 的 ERNIE-Image ComfyUI 节点
 - 不需要 CUDA
 - 支持 OpenVINO `GPU`、`CPU`、`AUTO`
 - 支持 Optimum/OpenVINO 标准导出目录
@@ -46,6 +46,12 @@ https://www.modelscope.cn/models/snake7gun/ERNIE-Image-Turbo-ov-int4
 C:\models\ERNIE-Image-Turbo-ov-int4
 ```
 
+如果使用 ERNIE-Image Base INT8，请准备 Optimum/OpenVINO 标准目录，例如：
+
+```text
+C:\models\ERNIE-Image-ov-int8
+```
+
 也可以使用 ModelScope CLI 下载：
 
 ```powershell
@@ -76,6 +82,8 @@ OpenVINO/ERNIE-Image/OpenVINO ERNIE-Image Text to Image
 
 ## 推荐参数
 
+Turbo INT4：
+
 ```text
 model_dir: C:\models\ERNIE-Image-Turbo-ov-int4
 device: GPU
@@ -85,6 +93,20 @@ width: 512
 height: 512
 steps: 8
 guidance_scale: 1.0
+seed: 42
+```
+
+Base INT8：
+
+```text
+model_dir: C:\models\ERNIE-Image-ov-int8
+device: GPU
+load_pe: true
+use_pe: false
+width: 512
+height: 512
+steps: 20
+guidance_scale: 4.0
 seed: 42
 ```
 
@@ -133,6 +155,20 @@ python .\scripts\verify_comfyui_api.py `
   --height 512 `
   --steps 8 `
   --guidance-scale 1.0 `
+  --timeout 1800
+```
+
+验证 Base INT8：
+
+```powershell
+python .\scripts\verify_comfyui_api.py `
+  --comfyui-dir C:\path\to\ComfyUI `
+  --model-profile base `
+  --model-dir C:\models\ERNIE-Image-ov-int8 `
+  --device GPU `
+  --width 512 `
+  --height 512 `
+  --no-use-pe `
   --timeout 1800
 ```
 

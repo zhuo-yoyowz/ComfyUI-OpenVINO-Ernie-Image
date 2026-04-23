@@ -18,6 +18,8 @@ python -m py_compile nodes.py scripts\check_env.py scripts\verify_comfyui_api.py
 ```powershell
 python -m json.tool workflows\ernie_image_turbo_int4_api.json
 python -m json.tool workflows\ernie_image_turbo_int4_comfyui.json
+python -m json.tool workflows\ernie_image_base_int8_api.json
+python -m json.tool workflows\ernie_image_base_int8_comfyui.json
 ```
 
 ## First GitHub Release
@@ -25,14 +27,14 @@ python -m json.tool workflows\ernie_image_turbo_int4_comfyui.json
 Suggested release title:
 
 ```text
-v0.1.0 - ERNIE-Image Turbo INT4 on Intel AI PCs
+v0.1.0 - ERNIE-Image Base INT8 and Turbo INT4 on Intel AI PCs
 ```
 
 Suggested release notes:
 
 ```text
 Initial release:
-- ComfyUI text-to-image node for ERNIE-Image Turbo INT4
+- ComfyUI text-to-image node for ERNIE-Image Base INT8 and Turbo INT4
 - OpenVINO GPU/CPU/AUTO device selection
 - Prompt Enhancer support
 - Intel AI PC launch scripts that avoid CUDA initialization

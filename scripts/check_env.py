@@ -85,13 +85,15 @@ def check_model(model_dir: str | None) -> bool:
     pe_tokenizer_exists = (model_path / "pe_tokenizer").is_dir()
     print(f"  [{'OK' if pe_exists else 'OPTIONAL'}] pe/openvino_model.xml")
     print(f"  [{'OK' if pe_tokenizer_exists else 'OPTIONAL'}] pe_tokenizer")
+    if pe_exists and not pe_tokenizer_exists:
+        print("  [INFO] PE model exists without pe_tokenizer; the ComfyUI node will run with PE disabled by default.")
     print()
     return ok
 
 
 def build_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Check the local environment for ComfyUI OpenVINO ERNIE-Image.")
-    parser.add_argument("--model-dir", help="Path to the Optimum-exported ERNIE-Image Turbo OpenVINO model.")
+    parser.add_argument("--model-dir", help="Path to the Optimum-exported ERNIE-Image OpenVINO model.")
     return parser
 
 

@@ -1,12 +1,12 @@
 # Model Layout
 
-This custom node supports ERNIE-Image Turbo models exported with Optimum Intel
-to the standard OpenVINO Diffusers layout.
+This custom node supports ERNIE-Image Base INT8 and ERNIE-Image Turbo INT4
+models exported with Optimum Intel to the standard OpenVINO Diffusers layout.
 
 ## Expected Directory
 
 ```text
-ERNIE-Image-Turbo-ov-int4/
+ERNIE-Image-ov-int8/ or ERNIE-Image-Turbo-ov-int4/
   model_index.json
   openvino_config.json
   scheduler/
@@ -30,9 +30,13 @@ pipe = OVErnieImagePipeline.from_pretrained(
     export=False,
     local_files_only=True,
     device="GPU",
-    load_pe=True,
+    load_pe=False,
 )
 ```
+
+The node loads the main pipeline first and then attaches the OpenVINO Prompt
+Enhancer itself when `load_pe=true`. This keeps Base INT8 and Turbo INT4 on the
+same tokenizer compatibility path.
 
 ## Recommended Download
 
@@ -58,10 +62,16 @@ modelscope download --model snake7gun/ERNIE-Image-Turbo-ov-int4 --local_dir C:\m
 
 Then use that directory as the ComfyUI node's `model_dir`.
 
+For ERNIE-Image Base INT8, use an Optimum/OpenVINO exported directory such as:
+
+```text
+C:\models\ERNIE-Image-ov-int8
+```
+
 ## Export Command
 
-When ERNIE-Image Turbo support is available in your Optimum Intel build, the
-intended export flow is:
+When ERNIE-Image support is available in your Optimum Intel build, the intended
+Turbo INT4 export flow is:
 
 ```powershell
 optimum-cli export openvino `
@@ -74,6 +84,16 @@ optimum-cli export openvino `
 
 If you already have an exported model directory, no export is needed. Point the
 ComfyUI node's `model_dir` directly at that directory.
+
+A Base INT8 export uses the same directory layout, but with INT8 weights:
+
+```powershell
+optimum-cli export openvino `
+  --model baidu/ERNIE-Image `
+  --task text-to-image `
+  --weight-format int8 `
+  C:\models\ERNIE-Image-ov-int8
+```
 
 ## Unsupported Legacy Layout
 
@@ -104,6 +124,11 @@ pe_tokenizer/
 ```
 
 the node can load the OpenVINO Prompt Enhancer when `load_pe=true`.
+
+`pe_tokenizer` is a tokenizer asset directory. It normally contains files such
+as `tokenizer.json`, `tokenizer_config.json`, `special_tokens_map.json`, and
+`chat_template.jinja`; it does not need OpenVINO tokenizer IR files for this
+node.
 
 Use `use_pe=false` when you want strict control over the original prompt. This
 is useful for product-like prompts, exact centering, and composition tests.

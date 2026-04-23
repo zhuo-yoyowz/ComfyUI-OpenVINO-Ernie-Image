@@ -1,0 +1,32 @@
+{
+  "1": {
+    "class_type": "OVErnieImageTextToImage",
+    "inputs": {
+      "model_dir": "C:/models/ERNIE-Image-ov-int8",
+      "prompt": "a centered whole red apple on a wooden table, studio lighting, sharp focus, high quality",
+      "negative_prompt": "",
+      "device": "GPU",
+      "load_pe": true,
+      "use_pe": false,
+      "pe_max_new_tokens": 256,
+      "text_encoder_device": "",
+      "transformer_device": "",
+      "vae_decoder_device": "",
+      "width": 512,
+      "height": 512,
+      "steps": 20,
+      "guidance_scale": 4.0,
+      "seed": 42
+    }
+  },
+  "2": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "ov_ernie_base_int8",
+      "images": [
+        "1",
+        0
+      ]
+    }
+  }
+}

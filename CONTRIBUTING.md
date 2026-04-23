@@ -35,6 +35,7 @@ Run the environment checker:
 
 ```powershell
 python .\scripts\check_env.py --model-dir C:\models\ERNIE-Image-Turbo-ov-int4
+python .\scripts\check_env.py --model-dir C:\models\ERNIE-Image-ov-int8
 ```
 
 ## Pull Requests

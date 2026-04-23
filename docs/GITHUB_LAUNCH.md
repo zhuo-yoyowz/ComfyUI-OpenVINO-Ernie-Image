@@ -15,7 +15,7 @@ ComfyUI-OpenVINO-Ernie-Image
 Use this as the GitHub repo description:
 
 ```text
-Run ERNIE-Image Turbo INT4 in ComfyUI on Intel AI PCs with OpenVINO. No CUDA required.
+Run ERNIE-Image Base INT8 and Turbo INT4 in ComfyUI on Intel AI PCs with OpenVINO. No CUDA required.
 ```
 
 ## Website
@@ -47,11 +47,12 @@ modelscope
 Suggested launch post:
 
 ```text
-I open-sourced a ComfyUI custom node for running ERNIE-Image Turbo INT4 on Intel AI PCs with OpenVINO.
+I open-sourced a ComfyUI custom node for running ERNIE-Image Base INT8 and Turbo INT4 on Intel AI PCs with OpenVINO.
 
 - No CUDA required
 - OpenVINO GPU / CPU / AUTO device selection
 - Pre-converted Turbo INT4 model on ModelScope
+- Optimum/OpenVINO Base INT8 layout support
 - Prompt Enhancer support
 - API smoke test and environment checker included
 

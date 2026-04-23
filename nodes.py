@@ -21,8 +21,15 @@ def _find_parent_path(name: str, required_child: str | None = None) -> Path | No
 
 
 def _default_model_dir() -> Path | None:
-    env_value = os.environ.get("ERNIE_IMAGE_TURBO_OV_DIR", "").strip()
-    if env_value:
+    env_keys = [
+        "ERNIE_IMAGE_OV_MODEL_DIR",
+        "ERNIE_IMAGE_TURBO_OV_DIR",
+        "ERNIE_IMAGE_BASE_OV_DIR",
+    ]
+    for key in env_keys:
+        env_value = os.environ.get(key, "").strip()
+        if not env_value:
+            continue
         candidate = Path(env_value).expanduser()
         if (candidate / "model_index.json").exists():
             return candidate
@@ -33,8 +40,11 @@ def _default_model_dir() -> Path | None:
         candidates.extend(
             [
                 parent / "ERNIE-Image-Turbo-ov-int4",
+                parent / "ERNIE-Image-ov-int8",
                 parent / "models" / "ERNIE-Image-Turbo-ov-int4",
+                parent / "models" / "ERNIE-Image-ov-int8",
                 parent / "Turbo" / "INT4",
+                parent / "Base" / "INT8",
             ]
         )
     for candidate in candidates:
@@ -106,6 +116,10 @@ def _attach_optimum_pe_if_available(pipeline, model_path: Path, device: str, loa
     return pipeline
 
 
+def _has_complete_openvino_pe(model_path: Path) -> bool:
+    return (model_path / "pe" / "openvino_model.xml").exists() and (model_path / "pe_tokenizer").is_dir()
+
+
 def _load_pipeline(
     model_dir: str,
     device: str,
@@ -118,7 +132,7 @@ def _load_pipeline(
     model_path = Path(model_dir).expanduser().resolve()
     if not (model_path / "model_index.json").exists():
         raise ValueError(
-            "Only Optimum-exported ERNIE-Image Turbo model directories are supported. "
+            "Only Optimum-exported ERNIE-Image model directories are supported. "
             "Expected model_index.json in model_dir."
         )
 
@@ -146,7 +160,9 @@ def _load_pipeline(
         "device": device,
         "export": False,
         "local_files_only": True,
-        "load_pe": load_pe,
+        # Load PE explicitly below so Base INT8 and Turbo INT4 share the same
+        # tokenizer compatibility path.
+        "load_pe": False,
     }
     text_device = _normalize_optional_device(text_encoder_device)
     transformer_device_value = _normalize_optional_device(transformer_device)
@@ -159,7 +175,13 @@ def _load_pipeline(
         kwargs["vae_decoder_device"] = vae_device
 
     pipeline = OVErnieImagePipeline.from_pretrained(model_path, **kwargs)
-    pipeline = _attach_optimum_pe_if_available(pipeline, model_path, device, load_pe, int(pe_max_new_tokens))
+    pipeline = _attach_optimum_pe_if_available(
+        pipeline,
+        model_path,
+        device,
+        load_pe and _has_complete_openvino_pe(model_path),
+        int(pe_max_new_tokens),
+    )
     _PIPELINE_CACHE[cache_key] = pipeline
     return pipeline
 
