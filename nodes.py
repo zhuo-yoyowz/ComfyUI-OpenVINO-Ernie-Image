@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+from collections import OrderedDict
 from pathlib import Path
 from typing import Optional
 
@@ -56,7 +57,8 @@ def _default_model_dir() -> Path | None:
 DEFAULT_MODEL_DIR = _default_model_dir()
 
 
-_PIPELINE_CACHE = {}
+_PIPELINE_CACHE_MAX_SIZE = 2
+_PIPELINE_CACHE: OrderedDict = OrderedDict()
 
 
 def _normalize_optional_device(value: str) -> Optional[str]:
@@ -183,6 +185,8 @@ def _load_pipeline(
         int(pe_max_new_tokens),
     )
     _PIPELINE_CACHE[cache_key] = pipeline
+    while len(_PIPELINE_CACHE) > _PIPELINE_CACHE_MAX_SIZE:
+        _PIPELINE_CACHE.popitem(last=False)
     return pipeline
 
 
@@ -254,7 +258,7 @@ class OVErnieImageTextToImage:
                         "step": 0.1,
                     },
                 ),
-                "seed": ("INT", {"default": 42, "min": 0, "max": 0xFFFFFFFFFFFFFFFF}),
+                "seed": ("INT", {"default": 42, "min": 0, "max": 0x7FFFFFFFFFFFFFFF}),
             }
         }
 
