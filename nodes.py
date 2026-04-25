@@ -150,6 +150,7 @@ def _load_pipeline(
 
     pipeline = _PIPELINE_CACHE.get(cache_key)
     if pipeline is not None:
+        _PIPELINE_CACHE.move_to_end(cache_key)
         return pipeline
 
     optimum_intel_path = _find_parent_path("optimum-intel", "optimum")
