@@ -14,5 +14,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install linter
+        run: python -m pip install ruff
+      - name: Lint with ruff
+        run: python -m ruff check nodes.py scripts/
       - name: Compile Python files
         run: python -m py_compile nodes.py scripts/check_env.py scripts/verify_comfyui_api.py scripts/start_comfyui_openvino.py
