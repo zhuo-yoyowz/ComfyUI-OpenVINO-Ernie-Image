@@ -23,8 +23,8 @@ def _find_parent_path(name: str, required_child: str | None = None) -> Path | No
 def _default_model_dir() -> Path | None:
     env_keys = [
         "ERNIE_IMAGE_OV_MODEL_DIR",
-        "ERNIE_IMAGE_TURBO_OV_DIR",
         "ERNIE_IMAGE_BASE_OV_DIR",
+        "ERNIE_IMAGE_TURBO_OV_DIR",
     ]
     for key in env_keys:
         env_value = os.environ.get(key, "").strip()
@@ -39,12 +39,15 @@ def _default_model_dir() -> Path | None:
     for parent in current.parents:
         candidates.extend(
             [
-                parent / "ERNIE-Image-Turbo-ov-int4",
                 parent / "ERNIE-Image-ov-int8",
-                parent / "models" / "ERNIE-Image-Turbo-ov-int4",
-                parent / "models" / "ERNIE-Image-ov-int8",
-                parent / "Turbo" / "INT4",
+                parent / "ernie_image_int8",
+                parent / "ernie_image_int8_fixed3",
                 parent / "Base" / "INT8",
+                parent / "models" / "ERNIE-Image-ov-int8",
+                parent / "models" / "ernie_image_int8",
+                parent / "ERNIE-Image-Turbo-ov-int4",
+                parent / "models" / "ERNIE-Image-Turbo-ov-int4",
+                parent / "Turbo" / "INT4",
             ]
         )
     for candidate in candidates:
@@ -57,6 +60,22 @@ DEFAULT_MODEL_DIR = _default_model_dir()
 
 
 _PIPELINE_CACHE = {}
+
+
+def _available_device_choices() -> list[str]:
+    choices = ["GPU", "GPU.0", "GPU.1", "CPU", "AUTO"]
+    try:
+        import openvino as ov
+
+        detected = list(ov.Core().available_devices)
+    except Exception:
+        detected = []
+
+    ordered = []
+    for device in detected + choices:
+        if device not in ordered:
+            ordered.append(device)
+    return ordered
 
 
 def _normalize_optional_device(value: str) -> Optional[str]:
@@ -217,7 +236,7 @@ class OVErnieImageTextToImage:
                         "multiline": True,
                     },
                 ),
-                "device": (["GPU", "CPU", "AUTO"], {"default": "GPU"}),
+                "device": (_available_device_choices(), {"default": "GPU.0"}),
                 "load_pe": ("BOOLEAN", {"default": True}),
                 "use_pe": ("BOOLEAN", {"default": True}),
                 "pe_max_new_tokens": ("INT", {"default": 256, "min": 32, "max": 2048, "step": 32}),
@@ -291,6 +310,11 @@ class OVErnieImageTextToImage:
             pe_max_new_tokens=int(pe_max_new_tokens),
         )
         generator = torch.Generator(device="cpu").manual_seed(int(seed))
+        can_use_pe = (
+            bool(use_pe)
+            and getattr(pipeline, "pe", None) is not None
+            and getattr(pipeline, "pe_tokenizer", None) is not None
+        )
         result = pipeline(
             prompt=prompt,
             negative_prompt=negative_prompt,
@@ -299,7 +323,7 @@ class OVErnieImageTextToImage:
             num_inference_steps=int(steps),
             guidance_scale=float(guidance_scale),
             generator=generator,
-            use_pe=bool(use_pe) and getattr(pipeline, "pe", None) is not None,
+            use_pe=can_use_pe,
         )
         revised_prompt = ""
         if getattr(result, "revised_prompts", None):

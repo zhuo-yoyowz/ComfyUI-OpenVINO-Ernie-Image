@@ -56,7 +56,7 @@ def check_openvino() -> bool:
 
         devices = ov.Core().available_devices
         print(f"  available_devices: {devices}")
-        has_gpu = "GPU" in devices
+        has_gpu = any(device == "GPU" or device.startswith("GPU.") for device in devices)
         print(f"  [{mark(has_gpu)}] Intel GPU visible to OpenVINO")
         print()
         return has_gpu

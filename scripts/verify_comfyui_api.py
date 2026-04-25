@@ -16,8 +16,12 @@ def default_openvino_device() -> str:
         import openvino as ov
 
         devices = ov.Core().available_devices
+        if "GPU.0" in devices:
+            return "GPU.0"
         if "GPU" in devices:
             return "GPU"
+        if "GPU.1" in devices:
+            return "GPU.1"
     except Exception:
         pass
     return "CPU"

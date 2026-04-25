@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 
 def find_comfyui_dir(explicit_dir: str | None = None) -> Path:
-    if explicit_dir:
-        comfyui_dir = Path(explicit_dir).expanduser().resolve()
+    env_dir = None if explicit_dir else os.environ.get("COMFYUI_DIR")
+    requested_dir = explicit_dir or env_dir
+    if requested_dir:
+        comfyui_dir = Path(requested_dir).expanduser().resolve()
         if (comfyui_dir / "main.py").exists():
             return comfyui_dir
         raise FileNotFoundError(f"Could not find ComfyUI main.py in: {comfyui_dir}")
@@ -20,7 +23,10 @@ def find_comfyui_dir(explicit_dir: str | None = None) -> Path:
         nested = parent / "ComfyUI"
         if (nested / "main.py").exists():
             return nested
-    raise FileNotFoundError("Could not locate ComfyUI. Pass --comfyui-dir explicitly.")
+    raise FileNotFoundError(
+        "Could not locate ComfyUI. Pass --comfyui-dir explicitly or set COMFYUI_DIR. "
+        "Example: python .\\scripts\\start_comfyui_openvino.py --comfyui-dir C:\\path\\to\\ComfyUI --port 8188"
+    )
 
 
 def build_argparser() -> argparse.ArgumentParser:

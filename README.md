@@ -15,12 +15,21 @@ Intel Arc GPUs, and Intel AI PCs**. No CUDA required.
 
 ## Highlights
 
-- **ComfyUI node for ERNIE-Image Base and Turbo** using the OpenVINO backend
+- **ComfyUI node for two OpenVINO ERNIE-Image models**: Base INT8 and Turbo INT4
 - **OpenVINO backend** with `GPU`, `CPU`, and `AUTO` device selection
 - **ERNIE-Image Base INT8 and Turbo INT4** support through the standard Optimum export layout
 - **Prompt Enhancer support** when the exported model contains `pe` and `pe_tokenizer`
 - **CUDA-free ComfyUI launchers** for Intel AI PCs
 - **API smoke test and environment checker** for repeatable validation
+
+## Model Downloads
+
+This repository currently supports two pre-converted OpenVINO models on ModelScope:
+
+- **ERNIE-Image Base INT8**
+  `https://www.modelscope.cn/models/yoyowz/ERNIE-Image-ov-int8/`
+- **ERNIE-Image Turbo INT4**
+  `https://www.modelscope.cn/models/snake7gun/ERNIE-Image-Turbo-ov-int4`
 
 ## 60-Second Setup
 
@@ -38,15 +47,17 @@ cd C:\path\to\ComfyUI
 python -m pip install -r .\custom_nodes\ComfyUI-OpenVINO-Ernie-Image\requirements.txt
 ```
 
-Download the pre-converted Turbo INT4 OpenVINO model from ModelScope:
+Download one or both pre-converted OpenVINO models from ModelScope:
 
 ```text
+https://www.modelscope.cn/models/yoyowz/ERNIE-Image-ov-int8/
 https://www.modelscope.cn/models/snake7gun/ERNIE-Image-Turbo-ov-int4
 ```
 
-Put the downloaded model directory somewhere local, for example:
+Put the downloaded model directories somewhere local, for example:
 
 ```text
+C:\models\ERNIE-Image-ov-int8
 C:\models\ERNIE-Image-Turbo-ov-int4
 ```
 
@@ -54,13 +65,8 @@ Optional CLI download:
 
 ```powershell
 python -m pip install modelscope
+modelscope download --model yoyowz/ERNIE-Image-ov-int8 --local_dir C:\models\ERNIE-Image-ov-int8
 modelscope download --model snake7gun/ERNIE-Image-Turbo-ov-int4 --local_dir C:\models\ERNIE-Image-Turbo-ov-int4
-```
-
-For ERNIE-Image Base INT8, use an Optimum/OpenVINO exported directory such as:
-
-```text
-C:\models\ERNIE-Image-ov-int8
 ```
 
 Start ComfyUI with the Intel AI PC launcher:
@@ -84,6 +90,47 @@ OpenVINO/ERNIE-Image/OpenVINO ERNIE-Image Text to Image
 
 Connect `image` to `SaveImage.images`.
 
+## Choosing a Model in ComfyUI
+
+The same node supports both model variants. You choose which model to run by
+changing the `model_dir` field.
+
+Device recommendation:
+
+- Use `GPU.0` by default. This is the recommended default because most users
+  have Intel integrated graphics but may not have an Intel discrete GPU.
+- If your system also has an Intel discrete GPU exposed by OpenVINO as
+  `GPU.1`, you can switch `device`, `text_encoder_device`,
+  `transformer_device`, and `vae_decoder_device` to `GPU.1`.
+- If you do not have a discrete GPU, keep `GPU.0`.
+
+For **ERNIE-Image Base INT8**:
+
+```text
+model_dir: C:\models\ERNIE-Image-ov-int8
+```
+
+For **ERNIE-Image Turbo INT4**:
+
+```text
+model_dir: C:\models\ERNIE-Image-Turbo-ov-int4
+```
+
+Recommended workflow in ComfyUI:
+
+1. Add `OpenVINO ERNIE-Image Text to Image`.
+2. Set `model_dir` to the local folder of the model you want to run.
+3. Use the matching parameter profile for Base or Turbo.
+4. Run the workflow.
+
+Recommended profiles:
+
+- **Base INT8**: `steps=20`, `guidance_scale=4.0`, `use_pe=false`
+- **Turbo INT4**: `steps=8`, `guidance_scale=1.0`, `use_pe=true`
+
+If you want to compare them side by side, duplicate the node and point each
+node to a different `model_dir`.
+
 ## Recommended Settings
 
 Turbo INT4:
@@ -92,13 +139,13 @@ Turbo INT4:
 model_dir: C:\models\ERNIE-Image-Turbo-ov-int4
 prompt: a centered whole red apple on a wooden table, studio lighting, sharp focus, high quality
 negative_prompt:
-device: GPU
+device: GPU.0
 load_pe: true
 use_pe: true
 pe_max_new_tokens: 256
-text_encoder_device:
-transformer_device:
-vae_decoder_device:
+text_encoder_device: GPU.0
+transformer_device: GPU.0
+vae_decoder_device: GPU.0
 width: 512
 height: 512
 steps: 8
@@ -112,13 +159,13 @@ Base INT8:
 model_dir: C:\models\ERNIE-Image-ov-int8
 prompt: a centered whole red apple on a wooden table, studio lighting, sharp focus, high quality
 negative_prompt:
-device: GPU
+device: GPU.0
 load_pe: true
 use_pe: false
 pe_max_new_tokens: 256
-text_encoder_device:
-transformer_device:
-vae_decoder_device:
+text_encoder_device: GPU.0
+transformer_device: GPU.0
+vae_decoder_device: GPU.0
 width: 512
 height: 512
 steps: 20
@@ -127,6 +174,15 @@ seed: 42
 ```
 
 For strict composition, keep `load_pe=true` and set `use_pe=false`.
+
+If you import the example workflows in this repo, the main thing you need to
+change is the `model_dir` field:
+
+- [workflows/ernie_image_base_int8_comfyui.json](workflows/ernie_image_base_int8_comfyui.json)
+- [workflows/ernie_image_turbo_int4_comfyui.json](workflows/ernie_image_turbo_int4_comfyui.json)
+
+The workflow defaults use `GPU.0`. If your machine has an Intel discrete GPU,
+you can manually change those fields to `GPU.1`.
 
 ## Check Your Environment
 
