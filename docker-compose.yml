@@ -1,0 +1,20 @@
+services:
+  comfyui-openvino-ernie-image:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        BASE_IMAGE: "${BASE_IMAGE:-mcr.microsoft.com/devcontainers/python:1-3.12-bookworm}"
+    image: comfyui-openvino-ernie-image:latest
+    ports:
+      - "${COMFYUI_PORT:-8188}:8188"
+    environment:
+      ERNIE_IMAGE_OV_MODEL_DIR: "${ERNIE_IMAGE_OV_MODEL_DIR:-/models/ERNIE-Image-ov-int8}"
+      COMFYUI_PORT: "8188"
+      COMFYUI_ARGS: "${COMFYUI_ARGS:-}"
+    volumes:
+      - "${COMFYUI_MODELS_DIR:-./models}:/models"
+      - "${COMFYUI_OUTPUT_DIR:-./docker-data/output}:/opt/ComfyUI/output"
+      - "${COMFYUI_INPUT_DIR:-./docker-data/input}:/opt/ComfyUI/input"
+      - "${COMFYUI_USER_DIR:-./docker-data/user}:/opt/ComfyUI/user"
+    restart: unless-stopped

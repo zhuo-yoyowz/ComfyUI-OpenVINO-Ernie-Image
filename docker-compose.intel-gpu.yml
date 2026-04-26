@@ -1,0 +1,4 @@
+services:
+  comfyui-openvino-ernie-image:
+    devices:
+      - "/dev/dri:/dev/dri"

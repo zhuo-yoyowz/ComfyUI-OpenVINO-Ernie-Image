@@ -104,6 +104,84 @@ OpenVINO/ERNIE-Image/OpenVINO ERNIE-Image Text to Image
 
 然后把节点输出 `image` 连接到 `SaveImage.images`。
 
+## Docker 部署
+
+现在仓库已经支持 Docker 部署。
+
+已包含的文件：
+
+- `docker/Dockerfile`
+- `docker/entrypoint.sh`
+- `docker-compose.yml`
+- `docker-compose.intel-gpu.yml`
+
+Docker 默认基础镜像使用 `mcr.microsoft.com/devcontainers/python:1-3.12-bookworm`。
+这样可以避开部分网络环境下访问 Docker Hub 的连接或限流问题；如果你有自己的
+基础镜像，也可以通过 `BASE_IMAGE` build argument 覆盖。
+
+建议宿主机目录结构：
+
+```text
+your-workspace/
+  ComfyUI-OpenVINO-Ernie-Image/
+  models/
+    ERNIE-Image-ov-int8/
+    ERNIE-Image-Turbo-ov-int4/
+```
+
+构建并启动容器：
+
+```powershell
+cd C:\path\to\ComfyUI-OpenVINO-Ernie-Image
+docker compose up --build
+```
+
+启动后访问：
+
+```text
+http://127.0.0.1:8188
+```
+
+默认挂载关系：
+
+- `./models` -> `/models`
+- `./docker-data/output` -> `/opt/ComfyUI/output`
+- `./docker-data/input` -> `/opt/ComfyUI/input`
+- `./docker-data/user` -> `/opt/ComfyUI/user`
+
+容器内默认模型目录：
+
+```text
+/models/ERNIE-Image-ov-int8
+```
+
+如果你希望默认指向 Turbo 模型，可以设置：
+
+```powershell
+$env:ERNIE_IMAGE_OV_MODEL_DIR="/models/ERNIE-Image-Turbo-ov-int4"
+docker compose up --build
+```
+
+### Docker 中启用 Intel GPU
+
+在 Linux 主机上，如果要把 Intel GPU 透传给容器，请使用：
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.intel-gpu.yml up --build
+```
+
+它会额外挂载：
+
+```text
+/dev/dri
+```
+
+说明：
+
+- Intel GPU Docker 透传主要面向 Linux 主机
+- 如果不加 `docker-compose.intel-gpu.yml`，也可以先用 CPU 方式启动
+- 在 Windows Docker Desktop 上，Intel GPU 透传是否可用取决于宿主机和容器运行环境，可能需要额外配置
+
 ## 如何在 ComfyUI 中选择不同模型
 
 这个节点同时支持 Base 和 Turbo，切换模型的方式就是修改 `model_dir`。
@@ -139,6 +217,13 @@ model_dir: C:\models\ERNIE-Image-Turbo-ov-int4
 - 一个指向 Turbo INT4
 
 这样可以在同一个 workflow 里快速比较两个模型。
+
+在 Docker 容器中，对应的 `model_dir` 通常写成：
+
+```text
+/models/ERNIE-Image-ov-int8
+/models/ERNIE-Image-Turbo-ov-int4
+```
 
 ## 推荐参数
 

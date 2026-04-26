@@ -90,6 +90,84 @@ OpenVINO/ERNIE-Image/OpenVINO ERNIE-Image Text to Image
 
 Connect `image` to `SaveImage.images`.
 
+## Docker Deployment
+
+Yes, this project now includes a Docker deployment path.
+
+Included files:
+
+- `docker/Dockerfile`
+- `docker/entrypoint.sh`
+- `docker-compose.yml`
+- `docker-compose.intel-gpu.yml`
+
+The default Docker base image is `mcr.microsoft.com/devcontainers/python:1-3.12-bookworm`.
+This avoids Docker Hub connectivity or rate-limit issues on some networks. If needed, you can
+override it with the `BASE_IMAGE` build argument.
+
+Recommended host layout:
+
+```text
+your-workspace/
+  ComfyUI-OpenVINO-Ernie-Image/
+  models/
+    ERNIE-Image-ov-int8/
+    ERNIE-Image-Turbo-ov-int4/
+```
+
+Build and start the container:
+
+```powershell
+cd C:\path\to\ComfyUI-OpenVINO-Ernie-Image
+docker compose up --build
+```
+
+This starts ComfyUI on:
+
+```text
+http://127.0.0.1:8188
+```
+
+By default, the compose file mounts:
+
+- `./models` to `/models`
+- `./docker-data/output` to `/opt/ComfyUI/output`
+- `./docker-data/input` to `/opt/ComfyUI/input`
+- `./docker-data/user` to `/opt/ComfyUI/user`
+
+Default model inside the container:
+
+```text
+/models/ERNIE-Image-ov-int8
+```
+
+If you want to change the default model path, set:
+
+```powershell
+$env:ERNIE_IMAGE_OV_MODEL_DIR="/models/ERNIE-Image-Turbo-ov-int4"
+docker compose up --build
+```
+
+### Intel GPU in Docker
+
+For Intel GPU acceleration on Linux, start with the extra compose file:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.intel-gpu.yml up --build
+```
+
+This mounts:
+
+```text
+/dev/dri
+```
+
+Notes:
+
+- Docker GPU passthrough is primarily intended for Linux hosts with Intel GPU access through `/dev/dri`.
+- CPU-only Docker deployment should still work without the Intel GPU compose override.
+- On Windows Docker Desktop, Intel GPU passthrough behavior depends on the host/container stack and may require additional setup outside this repository.
+
 ## Choosing a Model in ComfyUI
 
 The same node supports both model variants. You choose which model to run by
@@ -130,6 +208,13 @@ Recommended profiles:
 
 If you want to compare them side by side, duplicate the node and point each
 node to a different `model_dir`.
+
+Inside Docker, example `model_dir` values are:
+
+```text
+/models/ERNIE-Image-ov-int8
+/models/ERNIE-Image-Turbo-ov-int4
+```
 
 ## Recommended Settings
 
