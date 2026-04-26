@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import torch
@@ -78,7 +77,7 @@ def _available_device_choices() -> list[str]:
     return ordered
 
 
-def _normalize_optional_device(value: str) -> Optional[str]:
+def _normalize_optional_device(value: str) -> str | None:
     value = value.strip()
     return value or None
 

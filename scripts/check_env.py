@@ -5,7 +5,6 @@ import importlib.metadata
 import sys
 from pathlib import Path
 
-
 REQUIRED_MODEL_ITEMS = [
     "model_index.json",
     "scheduler",
