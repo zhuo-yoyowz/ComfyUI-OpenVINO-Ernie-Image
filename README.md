@@ -94,6 +94,10 @@ Connect `image` to `SaveImage.images`.
 
 Yes, this project now includes a Docker deployment path.
 
+Note: Docker deployment has been verified locally on Windows with CPU execution.
+If you want Intel GPU passthrough inside the container, use a Linux host with the
+optional `docker-compose.intel-gpu.yml` override.
+
 Included files:
 
 - `docker/Dockerfile`

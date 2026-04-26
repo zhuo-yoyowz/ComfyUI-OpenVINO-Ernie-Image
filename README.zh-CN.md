@@ -108,6 +108,10 @@ OpenVINO/ERNIE-Image/OpenVINO ERNIE-Image Text to Image
 
 现在仓库已经支持 Docker 部署。
 
+说明：这条 Docker 部署路径已经在 Windows 本机完成了 CPU 模式验证。
+如果你希望在容器中使用 Intel GPU，建议在 Linux 主机上配合可选的
+`docker-compose.intel-gpu.yml` override 使用。
+
 已包含的文件：
 
 - `docker/Dockerfile`
