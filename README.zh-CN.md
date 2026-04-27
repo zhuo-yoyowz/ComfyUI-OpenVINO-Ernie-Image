@@ -6,6 +6,8 @@
 
 ![Sample generated with ERNIE-Image Turbo INT4 and OpenVINO](assets/ComfyUI_00017_.png)
 
+![Base INT8 长 prompt 展示（use_pe=false）](assets/base_int8_long_prompt_showcase.png)
+
 ## 项目简介
 
 这个仓库提供一个 ComfyUI 自定义节点，用于在 OpenVINO 后端上运行两个 ERNIE-Image 模型：
@@ -288,6 +290,18 @@ use_pe: false
 导入后，通常你只需要改 `model_dir` 即可开始运行。
 
 workflow 默认设备已经设置为 `GPU.0`。如果你的机器有 Intel 独立显卡，并且 OpenVINO 中显示为 `GPU.1`，可以再手动改成 `GPU.1`。
+
+## 什么时候建议开启 PE
+
+Prompt Enhancer 很有用，但不建议把它当成所有 prompt 的默认选项。  
+结合这次对长 prompt 的实测，比较稳妥的建议是：
+
+- `use_pe=true`：适合短 prompt、风格探索、氛围感场景，以及允许模型做创意改写的任务。
+- `use_pe=false`：适合长 prompt、海报、信息图、流程图、排版类任务，以及任何要求图片里出现准确文字的场景。
+- `use_pe=false`：也更适合包含大量人物属性、服饰配件、多个物体清单、严格构图约束的 prompt。
+- 如果你希望节点里保留 PE 模型可选，可以继续 `load_pe=true`，但在这类任务里把 `use_pe=false`，直接使用原始 prompt。
+
+上面的展示图使用的是 **ERNIE-Image Base INT8**、**OpenVINO GPU**、**`use_pe=false`**，用于尽量保留长 prompt 的信息完整性。
 
 ## 环境检查
 

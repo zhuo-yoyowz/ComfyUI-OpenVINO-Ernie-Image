@@ -13,6 +13,8 @@ Intel Arc GPUs, and Intel AI PCs**. No CUDA required.
 
 ![Sample generated with ERNIE-Image Turbo INT4 and OpenVINO](assets/ComfyUI_00017_.png)
 
+![Long prompt showcase with Base INT8 and use_pe=false](assets/base_int8_long_prompt_showcase.png)
+
 ## Highlights
 
 - **ComfyUI node for two OpenVINO ERNIE-Image models**: Base INT8 and Turbo INT4
@@ -272,6 +274,19 @@ change is the `model_dir` field:
 
 The workflow defaults use `GPU.0`. If your machine has an Intel discrete GPU,
 you can manually change those fields to `GPU.1`.
+
+## When To Use Prompt Enhancer
+
+Prompt Enhancer is useful, but it should not be the default for every prompt.
+Based on validation with long real-world prompts, the safest guidance is:
+
+- Use `use_pe=true` for short prompts, style exploration, mood-heavy scenes, and cases where creative rewriting is welcome.
+- Use `use_pe=false` for long prompts, posters, infographics, diagrams, UI-like layouts, product sheets, or any prompt that requires exact in-image text.
+- Use `use_pe=false` when the prompt contains many named objects, character attributes, accessory lists, or strict spatial instructions.
+- Keep `load_pe=true` if you want the PE model available in the node, but send the original prompt directly with `use_pe=false`.
+
+The gallery above was generated with **ERNIE-Image Base INT8**, **OpenVINO GPU**,
+and **`use_pe=false`** to preserve long-prompt fidelity.
 
 ## Check Your Environment
 
