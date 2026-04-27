@@ -11,7 +11,6 @@
 Run **ERNIE-Image Base INT8** and **ERNIE-Image Turbo INT4** inside **ComfyUI** on **Intel integrated GPUs,
 Intel Arc GPUs, and Intel AI PCs**. No CUDA required.
 
-![Sample generated with ERNIE-Image Turbo INT4 and OpenVINO](assets/ComfyUI_00017_.png)
 
 ![Long prompt showcase with Base INT8 and use_pe=false](assets/base_int8_long_prompt_showcase.png)
 
