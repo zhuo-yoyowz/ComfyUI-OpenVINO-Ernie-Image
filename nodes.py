@@ -186,6 +186,7 @@ def _load_pipeline(
         int(pe_max_new_tokens),
     )
     _PIPELINE_CACHE[cache_key] = pipeline
+    _PIPELINE_CACHE.move_to_end(cache_key)
     while len(_PIPELINE_CACHE) > _PIPELINE_CACHE_MAX_SIZE:
         _PIPELINE_CACHE.popitem(last=False)
     return pipeline
