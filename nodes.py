@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+from collections import OrderedDict
 from pathlib import Path
 
 import numpy as np
@@ -58,7 +59,8 @@ def _default_model_dir() -> Path | None:
 DEFAULT_MODEL_DIR = _default_model_dir()
 
 
-_PIPELINE_CACHE = {}
+_PIPELINE_CACHE_MAX_SIZE = 2
+_PIPELINE_CACHE: OrderedDict = OrderedDict()
 
 
 def _available_device_choices() -> list[str]:
@@ -166,6 +168,7 @@ def _load_pipeline(
 
     pipeline = _PIPELINE_CACHE.get(cache_key)
     if pipeline is not None:
+        _PIPELINE_CACHE.move_to_end(cache_key)
         return pipeline
 
     optimum_intel_path = _find_parent_path("optimum-intel", "optimum")
@@ -201,6 +204,9 @@ def _load_pipeline(
         int(pe_max_new_tokens),
     )
     _PIPELINE_CACHE[cache_key] = pipeline
+    _PIPELINE_CACHE.move_to_end(cache_key)
+    while len(_PIPELINE_CACHE) > _PIPELINE_CACHE_MAX_SIZE:
+        _PIPELINE_CACHE.popitem(last=False)
     return pipeline
 
 
@@ -272,7 +278,7 @@ class OVErnieImageTextToImage:
                         "step": 0.1,
                     },
                 ),
-                "seed": ("INT", {"default": 42, "min": 0, "max": 0xFFFFFFFFFFFFFFFF}),
+                "seed": ("INT", {"default": 42, "min": 0, "max": 0x7FFFFFFFFFFFFFFF}),
             }
         }
 
